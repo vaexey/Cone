@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+    <Title>Cone</Title>
+    <Authors>vaexey</Authors>
+    <Description>Cone</Description>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags></PackageTags>
+    <RepositoryUrl>https://github.com/vaexey/Cone</RepositoryUrl>
+    <TargetFramework>net6.0</TargetFramework>
+    <LangVersion>10</LangVersion>
+    <RootNamespace>ConeEngine</RootNamespace>
+    <Version>0.1.0.0</Version>
+    <AssemblyVersion>$(Version)</AssemblyVersion>
+  </PropertyGroup>
+</Project>

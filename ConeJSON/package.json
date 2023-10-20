@@ -1,0 +1,12 @@
+{
+  "name": "cone-json",
+  "version": "0.1.0.0",
+  "description": "ConeJSON",
+  "main": "generateConfig.js",
+  "author": {
+    "name": "vaexey"
+  },
+  "dependencies": {
+    "json5": "^2.2.3"
+  }
+}
