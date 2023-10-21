@@ -14,9 +14,21 @@ namespace ConeEngine.Model.Entry.Bind
         public double ToMin { get; set; }
         public double ToMax { get; set; }
 
+        public double Modulo { get; set; } = 0;
+        public int Round { get; set; } = -1;
+
         public override double ScaleForward(double source)
         {
-            return (source - FromMin) / (FromMax - FromMin) * (ToMax - ToMin) + ToMin;
+
+            if (Modulo != 0)
+                source = source % Modulo;
+
+            source = (source - FromMin) / (FromMax - FromMin) * (ToMax - ToMin) + ToMin;
+
+            if (Round >= 0)
+                source = Math.Round(source, Round);
+
+            return source;
         }
         public override double ScaleBackward(double destination)
         {

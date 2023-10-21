@@ -13,4 +13,4 @@ This is an alpha stage of development. Many bugs are imminent and unavoidable.
 
 ...
 
-##### Current version: 0.1.0.0 (ALPHA)
+##### Current version: 0.1.1.0 (ALPHA)

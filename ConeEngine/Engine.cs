@@ -35,22 +35,32 @@ namespace ConeEngine
 
         public Result Initialize()
         {
-            Log.Logger = new LoggerConfiguration()
+            try
+            {
+                Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
                 .WriteTo.Console()
                 .WriteTo.File("log-.txt", rollingInterval: RollingInterval.Day)
                 .CreateLogger();
-            Log.Information("ConeEngine initialization begin.");
+                Log.Information("ConeEngine initialization begin.");
 
-            Log.Information("Available plugins: {0}", PluginLoader.Plugins.Count);
+                Log.Information("Available plugins: {0}", PluginLoader.Plugins.Count);
 
-            Log.Information("Loading config...");
-            Config.Load(this);
+                Log.Information("Loading config...");
+                Config.Load(this);
 
-            Log.Information("Enabling plugins...");
-            PluginLoader.Enable(Context);
+                Log.Information("Enabling plugins...");
+                PluginLoader.Enable(Context);
 
-            Scheduler.AddScheduledTask(TryEnableTask, 1000);
+                Scheduler.AddScheduledTask(TryEnableTask, 1000);
+            }
+            catch(Exception ex)
+            {
+                Log.Fatal("Initialization error:");
+                Log.Fatal("{0}", ex.ToString());
+
+                return Result.Error(ex);
+            }
 
             return Result.OK;
         }

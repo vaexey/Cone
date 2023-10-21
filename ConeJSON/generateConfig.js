@@ -1,3 +1,3 @@
 const compile = require('./compile.js');
 
-compile.compile("./config.json5", "./config.json");
+compile.compile("./config/config.json5", "./config/config.json");

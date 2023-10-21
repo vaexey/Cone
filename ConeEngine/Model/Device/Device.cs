@@ -1,4 +1,5 @@
-﻿using ConeEngine.Model.Entry.Bind;
+﻿using ConeEngine.Model.Entry.Action;
+using ConeEngine.Model.Entry.Bind;
 using ConeEngine.Model.Flow;
 using Newtonsoft.Json.Linq;
 using System;
@@ -17,6 +18,11 @@ namespace ConeEngine.Model.Device
         public virtual Result<BindNode> CreateBindNode(Context ctx, JObject config)
         {
             return Result.Error<BindNode>("Not implemented.");
+        }
+
+        public virtual Result<CAction> CreateAction(Context ctx, string target, JObject config)
+        {
+            return Result.Error<CAction>("Not implemented.");
         }
     }
 }

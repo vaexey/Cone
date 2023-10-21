@@ -4,8 +4,23 @@ const fs = require('fs/promises');
 const util = require('./util.js');
 
 exports.compile = async (srcPath, destPath) => {
-    const read = (await fs.readFile(srcPath)).toString();
-    const src = JSON5.parse(read);
+    let json = (await fs.readFile(srcPath)).toString();
+
+    let i = json.indexOf("$include:");
+    while(i != -1)
+    {
+        var word = json.substring(i + 1)
+        word = word.substring(0, word.indexOf("$"))
+
+        var path = word.substring("include:".length);
+
+        let inc = (await fs.readFile(`./config/` + path)).toString();
+
+        json = json.replaceAll(`$${word}$`, inc)
+        i = json.indexOf("$include:");
+    }
+
+    const src = JSON5.parse(json);
 
     const dest = exports.compileRaw(src);
     const write = JSON.stringify(dest, null, 4);
@@ -14,8 +29,10 @@ exports.compile = async (srcPath, destPath) => {
 }
 
 exports.compileRaw = (src) => {
+    let macros = src.macros;
+
     let devices = src.devices.map(exports.expandDevice);
-    let entries = src.entries.map(exports.expandEntry);
+    let entries = util.applyMacros(macros,src.entries).map(exports.expandEntry);
 
     return {
         devices,
@@ -86,6 +103,13 @@ exports.expandEntry = (src) => {
     
         ent.input = ent.input.map(exports.expandBindNode)
         ent.output = ent.output.map(exports.expandBindNode)
+    }
+
+    if(ent.type.toLowerCase() == "event")
+    {
+        ent.type = "event";
+
+        util.arrayKey(ent, "trigger");
     }
 
     return ent;

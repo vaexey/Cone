@@ -3,9 +3,13 @@
 Engine e = new();
 
 PluginLoader.LoadPlugins();
-e.Initialize();
 
-while(true)
+if(!e.Initialize().IsOK)
+{
+    return;
+}
+
+while (true)
 {
     e.Update();
     Thread.Sleep(1);

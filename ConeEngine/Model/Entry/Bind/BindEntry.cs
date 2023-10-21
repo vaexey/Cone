@@ -1,4 +1,5 @@
 ﻿using ConeEngine.Model.Flow;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,9 @@ namespace ConeEngine.Model.Entry.Bind
 
         public virtual BindDirection Direction { get; set; } = BindDirection.FORWARD;
 
+        public virtual BindPolicy Policy { get; set; } = BindPolicy.ALWAYS;
+        protected double policyLastValue = double.MaxValue;
+
         public BindEntry()
         {
             Inputs = new();
@@ -29,10 +33,16 @@ namespace ConeEngine.Model.Entry.Bind
 
         public override Result Update(Context ctx)
         {
-            var updates = Inputs.Select(i =>
+            var updates = Inputs.Where(i =>
             {
                 if (i.Diff())
-                    return i.Trigger.Validate(i.Get());
+                    return i.Trigger.Validate(
+                            i.TriggerScaling.ScaleForward(
+                                /*i.Scaling.ScaleForward(*/
+                                    i.Get()
+                                /*)*/
+                            )
+                        );
 
                 return false;
             }).ToArray();
@@ -44,32 +54,60 @@ namespace ConeEngine.Model.Entry.Bind
                 doUpdateBack = Outputs.Select(i =>
                 {
                     if (i.Diff())
-                        return i.Trigger.Validate(i.Get());
+                        return i.Trigger.Validate(
+                                i.TriggerScaling.ScaleForward(
+                                    /*i.Scaling.ScaleForward(*/
+                                        i.Get()
+                                    /*)*/
+                                )
+                            );
 
                     return false;
                 }).ToArray().Where(u => u).Any();
             }
 
-            var doUpdate = updates.Where(u => u).Any();
+            //var doUpdate = updates.Where(u => u).Any();
+            var doUpdate = updates.Any();
+
+            //if(doUpdate)
+            //{
+
+            //    if (Policy == BindPolicy.ON_CHANGE)
+            //    {
+            //        if (Math.Abs(policyLastValue - input) < 0.01)
+            //        {
+            //            doUpdate = false;
+            //        }
+            //    }
+
+            //    policyLastValue = input;
+            //}
 
             if(doUpdate)
             {
                 var input = Method.Combine(
-                    Inputs.Select(e => e.Scaling.ScaleForward(e.Get())),
-                    Inputs.Count
+                    updates.Select(e => e.Scaling.ScaleForward(e.Get())),
+                    updates.Count()
                 );
 
-                var output = Method.Distribute(
-                    input,
-                    Outputs.Count
-                );
-
-                foreach (var o in Outputs.Zip(output, (a, b) => new { Output = a, Value = b }))
+                if (Policy != BindPolicy.ON_CHANGE || Math.Abs(policyLastValue - input) > 0.01)
                 {
-                    o.Output.Set(o.Output.Scaling.ScaleForward(o.Value));
-                }
+                    policyLastValue = input;
 
-                return Result.OK;
+                    var output = Method.Distribute(
+                        input,
+                        Outputs.Count
+                    );
+
+                    Log.Verbose("Entry {0} trigger & policy passed.", ID);
+
+                    foreach (var o in Outputs.Zip(output, (a, b) => new { Output = a, Value = b }))
+                    {
+                        o.Output.Set(o.Output.Scaling.ScaleForward(o.Value));
+                    }
+
+                    return Result.OK;
+                }
             }
 
             if (doUpdateBack)

@@ -9,6 +9,8 @@ namespace ConeEngine.Model.Entry.Bind
     public abstract class BindNode
     {
         public BindScaling Scaling { get; set; } = new();
+
+        public BindScaling TriggerScaling { get; set; } = new();
         public BindTrigger Trigger { get; set; } = new();
 
         public abstract double Get();
