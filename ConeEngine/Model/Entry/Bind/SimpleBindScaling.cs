@@ -25,8 +25,8 @@ namespace ConeEngine.Model.Entry.Bind
 
             source = (source - FromMin) / (FromMax - FromMin) * (ToMax - ToMin) + ToMin;
 
-            if (Round >= 0)
-                source = Math.Round(source, Round);
+            if (Round > 0)
+                source = Math.Round(source, Round - 1);
 
             return source;
         }

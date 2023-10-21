@@ -70,6 +70,16 @@ namespace ConeEngine.Internal
                 return Result.VAL<BindNode>(bn);
             }
 
+            if(target == "once")
+            {
+                var bn = new OnceInternalBindNode();
+
+                if (config.Value<double?>("") is double start)
+                    bn.Value = start;
+
+                return Result.VAL<BindNode>(bn);
+            }
+
             return Result.Error<BindNode>("Could not find matching internal bind node.");
         }
     }

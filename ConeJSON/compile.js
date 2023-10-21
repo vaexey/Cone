@@ -165,6 +165,8 @@ exports.expandBindNode = (src) => {
         }
     }
 
+    bn.scale.from = bn.scale.from.map(v => +v)
+    bn.scale.to = bn.scale.to.map(v => +v)
 
     return bn;
 }
