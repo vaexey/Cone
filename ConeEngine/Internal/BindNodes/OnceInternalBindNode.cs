@@ -24,11 +24,15 @@ namespace ConeEngine.Internal.BindNodes
             DiffValue = true;
         }
 
-        public override bool Diff()
+        public override bool HasPoll(bool reset = false)
         {
             if(DiffValue)
             {
-                DiffValue = false;
+                if(reset)
+                {
+                    DiffValue = false;
+                }
+
                 return true;
             }
 

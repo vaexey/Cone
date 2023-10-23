@@ -1,4 +1,5 @@
 ﻿using ConeEngine.Model.Flow;
+using Newtonsoft.Json.Linq;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -10,129 +11,102 @@ namespace ConeEngine.Model.Entry.Bind
 {
     public class BindEntry : Entry
     {
-        public virtual List<BindNode> Inputs { get; set; }
-        public virtual List<BindNode> Outputs { get; set; }
+        public override EntryType? Type => EntryType.BIND;
+
+        public virtual List<BindNode> Inputs { get; set; } = new();
+        public virtual List<BindNode> Outputs { get; set; } = new();
 
         public virtual BindNode MainInput { get => Inputs.First(); }
         public virtual BindNode MainOutput { get => Outputs.First(); }
 
-        public virtual BindMethod Method { get; set; } = new SimpleBindMethod();
+        public virtual BindScaling InputScaling { get; set; } = new BindScaling();
+        public virtual BindScaling OutputScaling { get; set; } = new BindScaling();
 
-        public override EntryType? Type => EntryType.BIND;
+        public virtual BindTrigger Trigger { get; set; } = new BindTrigger();
+
+        public virtual BindMethod Method { get; set; } = new BindMethod();
 
         public virtual BindDirection Direction { get; set; } = BindDirection.FORWARD;
 
-        public virtual BindPolicy Policy { get; set; } = BindPolicy.ALWAYS;
-        protected double policyLastValue = double.MaxValue;
-
-        public BindEntry()
-        {
-            Inputs = new();
-            Outputs = new();
-        }
-
         public override Result Update(Context ctx)
         {
-            var updates = Inputs.Where(i =>
-            {
-                if (i.Diff())
-                    return i.Trigger.Validate(
-                            i.TriggerScaling.ScaleForward(
-                                /*i.Scaling.ScaleForward(*/
-                                    i.Get()
-                                /*)*/
-                            )
-                        );
+            var inputUpdates = GetUpdatesOf(Inputs);
 
-                return false;
-            }).ToArray();
+            var doInputUpdate = inputUpdates.Any();
 
-            var doUpdateBack = false;
-
-            if(Direction == BindDirection.BOTH)
-            {
-                doUpdateBack = Outputs.Select(i =>
-                {
-                    if (i.Diff())
-                        return i.Trigger.Validate(
-                                i.TriggerScaling.ScaleForward(
-                                    /*i.Scaling.ScaleForward(*/
-                                        i.Get()
-                                    /*)*/
-                                )
-                            );
-
-                    return false;
-                }).ToArray().Where(u => u).Any();
-            }
-
-            //var doUpdate = updates.Where(u => u).Any();
-            var doUpdate = updates.Any();
-
-            //if(doUpdate)
-            //{
-
-            //    if (Policy == BindPolicy.ON_CHANGE)
-            //    {
-            //        if (Math.Abs(policyLastValue - input) < 0.01)
-            //        {
-            //            doUpdate = false;
-            //        }
-            //    }
-
-            //    policyLastValue = input;
-            //}
-
-            if(doUpdate)
-            {
-                var input = Method.Combine(
-                    updates.Select(e => e.Scaling.ScaleForward(e.Get())),
-                    updates.Count()
-                );
-
-                if (Policy != BindPolicy.ON_CHANGE || Math.Abs(policyLastValue - input) > 0.01)
-                {
-                    policyLastValue = input;
-
-                    var output = Method.Distribute(
-                        input,
-                        Outputs.Count
-                    );
-
-                    Log.Verbose("Entry {0} trigger & policy passed.", ID);
-
-                    foreach (var o in Outputs.Zip(output, (a, b) => new { Output = a, Value = b }))
-                    {
-                        o.Output.Set(o.Output.Scaling.ScaleForward(o.Value));
-                    }
-
-                    return Result.OK;
-                }
-            }
-
-            if (doUpdateBack)
-            {
-                var input = Method.Combine(
-                    Outputs.Select(e => e.Scaling.ScaleForward(e.Get())),
-                    Outputs.Count
-                );
-
-                var output = Method.Distribute(
-                    input,
-                    Inputs.Count
-                );
-
-                foreach (var o in Inputs.Zip(output, (a, b) => new { Input = a, Value = b }))
-                {
-                    o.Input.Set(o.Input.Scaling.ScaleForward(o.Value));
-                }
-
-                return Result.OK;
-            }
+            if (doInputUpdate)
+                DoInputUpdate(inputUpdates);
 
             return Result.OK;
         }
 
+        protected virtual void DoInputUpdate(BindNode[] nodes)
+        {
+            var combinedValue = Method.Combine(
+                nodes.Select(node =>
+                    node.Scaling.ScaleForward(
+                        node.Prescaler.ScaleForward(
+                            node.Get()
+                        )
+                    )
+               ),
+                nodes.Length
+            );
 
+            var inputScaled = InputScaling.ScaleForward(combinedValue);
+
+            var triggerStatus = Trigger.Validate(inputScaled, true);
+
+            var outputScaled = OutputScaling.ScaleForward(inputScaled);
+
+            var distributed = Method.Distribute(outputScaled, Outputs.Count);
+
+            foreach(var zip in Outputs.Zip(distributed, (a,b) => new { Output = a, Value = b }))
+            {
+                var output = zip.Output;
+                var value = zip.Value;
+
+                var mainScaled = output.Scaling.ScaleForward(value);
+                var triggerScaled = output.TriggerScaling.ScaleForward(mainScaled);
+                var prescaled = output.Prescaler.ScaleForward(mainScaled);
+
+                if (output.Trigger.Validate(triggerScaled, true))
+                    output.Set(prescaled);
+            }
+        }
+
+        protected static BindNode[] GetUpdatesOf(List<BindNode> nodes)
+        {
+            return nodes.Where(node =>
+            {
+                var poll = node.HasPoll(true);
+
+                var value = node.Get();
+                var prescaled = node.Prescaler.ScaleForward(value);
+                var tscaled = node.TriggerScaling.ScaleBackward(prescaled);
+
+                return node.Trigger.Validate(value, poll);
+            }).ToArray();
+        }
+
+        public override void Deserialize(JObject config, Context ctx)
+        {
+            base.Deserialize(config, ctx);
+
+            var inj = config["input"] as JArray;
+            var outj = config["output"] as JArray;
+
+            if (inj == null || outj == null)
+                throw new Exception($"Entry ${ID} does not have bind nodes.");
+
+            Inputs = inj.Select(bnj => ctx.InstantiateBindNode(bnj as JObject)).ToList();
+            Outputs = outj.Select(bnj => ctx.InstantiateBindNode(bnj as JObject)).ToList();
+
+            if(config.Value<string>("direction") is string direction)
+            {
+                if (direction == "both")
+                    Direction = BindDirection.BOTH;
+            }
+        }
     }
 }

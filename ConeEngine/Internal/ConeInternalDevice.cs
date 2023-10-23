@@ -80,6 +80,13 @@ namespace ConeEngine.Internal
                 return Result.VAL<BindNode>(bn);
             }
 
+            if(target == "debug")
+            {
+                var bn = new DebugInternalBindNode();
+
+                return Result.VAL<BindNode>(bn);
+            }
+
             return Result.Error<BindNode>("Could not find matching internal bind node.");
         }
     }

@@ -1,4 +1,5 @@
 ﻿using ConeEngine.Model.Entry.Bind;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,25 +8,21 @@ using System.Threading.Tasks;
 
 namespace ConeEngine.Internal.BindNodes
 {
-    public class TimeInternalBindNode : BindNode
+    internal class DebugInternalBindNode : BindNode
     {
         public override double Get()
         {
-            var t = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalMilliseconds;
-
-            //t = 499;
-
-            return t;
+            return 1;
         }
 
         public override void Set(double value)
         {
-            throw new Exception("Cannot set random generator value.");
+            Log.Information("Debug node value set to {0}", value);
         }
 
         public override bool HasPoll(bool reset = false)
         {
-            return true;
+            return false;
         }
     }
 }

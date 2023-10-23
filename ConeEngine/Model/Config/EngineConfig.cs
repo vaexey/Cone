@@ -86,31 +86,29 @@ namespace ConeEngine.Model.Config
             {
                 try
                 {
-                    var name = entj.Value<string>("name");
-                    var id = entj.Value<string>("id");
                     var type = entj.Value<string>("type");
+                    var id = entj.Value<string>("id");
 
+                    Log.Verbose("Registering entry...", id);
+                    
                     Entry.Entry ent;
-
-                    Log.Verbose("Registering entry {0}...", name);
 
                     if (type == "bind")
                     {
-                        ent = DeserializeBindEntry(e, entj);
+                        ent = new BindEntry();
                     }
                     else if(type == "event")
                     {
-                        ent = DeserializeEventEntry(e, entj);
+                        ent = new EventEntry();
                     }
                     else
                     {
-                        Log.Warning("Unknown type {0} for node {1}", type, name);
+                        Log.Warning("Unknown type {0} for node {1}", type, id);
 
                         continue;
                     }
 
-                    ent.Name = name;
-                    ent.ID = id;
+                    ent.Deserialize(entj as JObject, e.Context);
 
                     e.Entries.Add(ent);
                 }
@@ -119,35 +117,6 @@ namespace ConeEngine.Model.Config
                     Log.Error("Could not load entry. Error: {0}", ex.Message);
                 }
             }
-        }
-
-        protected BindEntry DeserializeBindEntry(Engine e, JToken entj)
-        {
-            var inj = entj["input"] as JArray;
-            var outj = entj["output"] as JArray;
-
-            var ins = inj.Select(bnj => DeserializeBindNode(e, bnj));
-            var outs = outj.Select(bnj => DeserializeBindNode(e, bnj));
-
-            var bn = new BindEntry()
-            {
-                Inputs = ins.ToList(),
-                Outputs = outs.ToList()
-            };
-
-            if (entj.Value<string>("direction") is string dir)
-            {
-                if (dir == "both")
-                    bn.Direction = BindDirection.BOTH;
-            }
-
-            if (entj.Value<string>("policy") is string pol)
-            {
-                if (pol == "change")
-                    bn.Policy = BindPolicy.ON_CHANGE;
-            }
-
-            return bn;
         }
 
         protected EventEntry DeserializeEventEntry(Engine e, JToken entj)
@@ -168,40 +137,18 @@ namespace ConeEngine.Model.Config
 
         protected EventNode DeserializeEventNode(Engine e, JToken bnj)
         {
-            if (bnj["bind"] is JToken o)
-            {
-                var ben = new BindEventNode(DeserializeBindNode(e, o));
+            return null;
+            //if (bnj["bind"] is JToken o)
+            //{
+            //    //var ben = new BindEventNode(DeserializeBindNode(e, o));
 
-                if (bnj.Value<bool>("change") is bool change)
-                    ben.OnChange = change;
+            //    if (bnj.Value<bool>("change") is bool change)
+            //        ben.OnChange = change;
 
-                return ben;
-            }
+            //    return ben;
+            //}
 
-            throw new Exception("Unknown event node type in " + bnj.ToString());
-        }
-
-        protected BindNode DeserializeBindNode(Engine e, JToken bnj)
-        {
-            var devid = bnj.Value<string>("device");
-            var dev = e.GetDevice(devid);
-
-            var bn = dev.CreateBindNode(e.Context, (JObject)bnj).Value;
-
-            if (bnj.Value<JObject>("scale") is JObject scalej)
-            {
-                bn.Scaling = ParseScaling(scalej);
-            }
-
-            if(bnj.Value<JObject>("trigger") is JObject trigj)
-            {
-                bn.Trigger = ParseTrigger(trigj);
-
-                if (trigj["scale"] is JObject tscalej)
-                    bn.TriggerScaling = ParseScaling(tscalej);
-            }
-
-            return bn;
+            //throw new Exception("Unknown event node type in " + bnj.ToString());
         }
 
         protected CAction DeserializeAction(Engine e, JToken acj)
@@ -216,52 +163,6 @@ namespace ConeEngine.Model.Config
                 act.Timeout = timeout;
 
             return act;
-        }
-
-        protected BindScaling ParseScaling(JObject scalej)
-        {
-            var type = "";
-
-            if (scalej.Value<string?>("type") is string t)
-                type = t;
-
-
-            var sfrom = scalej["from"].Select(x => double.Parse(x.ToString()));
-            var sto = scalej["to"].Select(x => double.Parse(x.ToString()));
-
-            var sc = new SimpleBindScaling()
-            {
-                FromMin = sfrom.First(),
-                FromMax = sfrom.Last(),
-                ToMin = sto.First(),
-                ToMax = sto.Last()
-            };
-
-            if (scalej.Value<double>("mod") is double mod)
-                sc.Modulo = mod;
-
-            if (scalej.Value<int>("round") is int round)
-                sc.Round = round;
-
-            // Simple default
-
-            return sc;
-        }
-
-        protected BindTrigger ParseTrigger(JObject btj)
-        {
-            var bt = new BindTrigger();
-
-            if(btj.Value<bool>("enabled") is bool enabled)
-                bt.Enabled = enabled;
-
-            if (btj.Value<double>("min") is double min)
-                bt.Minimum = min;
-
-            if (btj.Value<double>("max") is double max)
-                bt.Maximum = max;
-
-            return bt;
         }
     }
 }

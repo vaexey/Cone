@@ -20,8 +20,9 @@ namespace ConeEngine.Model.Entry.Event
 
         public override bool Poll(Context ctx)
         {
-            return Target.Trigger.Validate(
-                Target.Get()) && (!OnChange || Target.Diff());
+            //return Target.Trigger.Validate(
+            //    Target.Get()) && (!OnChange || Target.Diff());
+            return false;
         }
     }
 }

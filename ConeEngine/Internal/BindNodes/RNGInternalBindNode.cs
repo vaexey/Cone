@@ -24,7 +24,7 @@ namespace ConeEngine.Internal.BindNodes
             throw new Exception("Cannot set random generator value.");
         }
 
-        public override bool Diff()
+        public override bool HasPoll(bool reset = false)
         {
             return true;
         }

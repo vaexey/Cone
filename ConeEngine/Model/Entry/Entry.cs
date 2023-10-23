@@ -1,4 +1,5 @@
 ﻿using ConeEngine.Model.Flow;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,5 +24,13 @@ namespace ConeEngine.Model.Entry
         }
 
         public abstract Result Update(Context ctx);
+        public virtual void Deserialize(JObject config, Context ctx)
+        {
+            if (config.Value<string>("id") is string id)
+                ID = id;
+
+            if (config.Value<string>("name") is string name)
+                Name = name;
+        }
     }
 }
