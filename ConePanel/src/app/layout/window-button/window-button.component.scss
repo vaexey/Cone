@@ -1,0 +1,168 @@
+$button-size: 20px;
+$io-gap: 2px;
+
+.outer
+{
+    width: $button-size;
+    height: $button-size;
+
+    -webkit-app-region: no-drag;
+
+    &:hover
+    {
+        cursor: pointer;
+    }
+
+    &:hover.close
+    {
+        .inner
+        {
+            background-color: rgba(255,0,0,0.5);
+        }
+    }
+
+    &:hover.minimize, &:hover.maximize
+    {
+        .inner
+        {
+            background-color: rgba(20,127,255,0.5);
+        }
+    }
+
+    &.active.maximize .inner .ico-maximize
+    {
+        &::after
+        {
+            content: " ";
+            display:block;
+
+            position: absolute;
+            top: 6px;
+            left: 2px;
+
+            width: 10px;
+            height: 1px;
+
+            border-style: dashed;
+            border-width: 1px;
+            border-color: white;
+            transform: rotate(-45deg);
+        }
+    }
+
+    &.close .inner .ico-close
+    {
+        display: block;
+    }
+    &.maximize .inner .ico-maximize
+    {
+        display: block;
+    }
+    &.minimize .inner .ico-minimize
+    {
+        display: block;
+    }
+}
+
+.inner
+{
+    margin: $io-gap - 1px;
+    width: $button-size - 2*$io-gap;
+    height: $button-size - 2*$io-gap;
+}
+
+.inner, .outer
+{
+    border-style: solid;
+    border-color: white;
+    border-width: 1px;
+    border-radius: 5px;
+}
+
+.ico-close
+{
+    display: none;
+
+    position: relative;
+
+    &::before
+    {
+        content: " ";
+        display:block;
+
+        position: absolute;
+        top: 6px;
+        left: 2px;
+
+        width: 10px;
+        height: 1px;
+
+        border-style: solid;
+        border-width: 1px;
+        border-color: white;
+        transform: rotate(45deg);
+    }
+    &::after
+    {
+        content: " ";
+        display:block;
+
+        position: absolute;
+        top: 6px;
+        left: 2px;
+
+        width: 10px;
+        height: 1px;
+
+        border-style: solid;
+        border-width: 1px;
+        border-color: white;
+        transform: rotate(-45deg);
+    }
+}
+.ico-maximize
+{
+    display: none;
+
+    position: relative;
+
+    &::before
+    {
+        content: " ";
+        display:block;
+
+        position: absolute;
+        top: 2px;
+        left: 2px;
+
+        width: 10px;
+        height: 10px;
+
+        border-style: dotted;
+        border-width: 1px;
+        border-color: white;
+    }
+}
+.ico-minimize
+{
+    display: none;
+
+    position: relative;
+
+    &::before
+    {
+        content: " ";
+        display:block;
+
+        position: absolute;
+        top: 10px;
+        left: 2px;
+
+        width: 10px;
+        height: 1px;
+
+        border-style: solid;
+        border-width: 1px;
+        border-color: white;
+    }
+}

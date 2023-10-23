@@ -1,0 +1,161 @@
+$color-window: rgb(64,64,64);
+$color-content-border: rgb(100,100,100);
+
+.drag
+{
+    -webkit-app-region: drag;
+}
+
+.window
+{
+    display: flex;
+
+    flex-flow: column;
+
+    width: 100vw;
+    height: 100vh;
+
+    margin: 0;
+
+    position: relative;
+
+    // background-color: #444;
+
+    user-select: none;
+
+    .titlebar
+    {
+        border-radius: 10px 10px 0 0;
+
+        width: 100vw;
+        height: 30px;
+
+        background: $color-window;
+
+        display: flex;
+        flex-flow: row;
+
+        .icon
+        {
+            width: 30px;
+
+            .img
+            {
+                margin: 2.5px;
+                width: 25px;
+                height: 25px;
+                background-image: url('/assets/cone.png');
+                background-size: contain;
+            }
+        }
+
+        .title
+        {
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            flex: 1;
+
+            // background: red;
+        }
+
+        .btns
+        {
+            // width: 60px;
+        }
+    }
+
+    .center
+    {
+        flex: 1;
+
+        display: flex;
+        flex-flow: row;
+
+        .side
+        {
+            width: 10px;
+            height: 100%;
+            background-color: $color-window;
+        }
+
+        .content
+        {
+            flex: 1;
+
+            border-style: solid;
+            border-width: 1px;
+            border-color: $color-content-border;
+
+            position: relative;
+
+            .outlet
+            {
+                width: 100%;
+                height: 100%;
+            }
+
+            .bg
+            {
+                top: 0;
+                left: 0;
+
+                position: absolute;
+                width: 100%;
+                height: 100%;
+
+                background: black;
+                opacity: 0.8;
+
+                z-index: -10;
+            }
+        }
+    }
+
+    .footer
+    {
+        width: 100vw;
+        height: 10px;
+        background-color: $color-window;
+
+        border-radius: 0 0 10px 10px;
+    }
+
+    .fade
+    {
+    
+        position: absolute;
+
+        top: 0;
+        left: 0;
+    
+        width: 100vw;
+        height: 100vh;
+
+        pointer-events: none;
+
+        background-color: $color-window;
+
+        border-radius: 10px;
+        opacity: 0;
+
+        animation: fade-opacity 2s ease-out 0s;
+    }
+}
+
+@keyframes fade-opacity {
+    0%
+    {
+        opacity: 1;
+    }
+    25%
+    {
+        opacity: 1;
+    }
+    100%
+    {
+        opacity: 0;
+    }
+}

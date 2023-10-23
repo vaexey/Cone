@@ -1,0 +1,5 @@
+<div class="btns">
+    <app-window-button [type]="'minimize'" (bclick)="minimize()"></app-window-button>
+    <app-window-button [type]="'maximize'" [state]="electron.maximized" (bclick)="maximize()"></app-window-button>
+    <app-window-button [type]="'close'" (bclick)="close()"></app-window-button>
+</div>
