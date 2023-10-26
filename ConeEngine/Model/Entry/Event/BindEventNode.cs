@@ -11,7 +11,6 @@ namespace ConeEngine.Model.Entry.Event
     public class BindEventNode : EventNode
     {
         public BindNode Target { get; set; }
-        public bool OnChange = false;
 
         public BindEventNode(BindNode target)
         {
@@ -22,7 +21,18 @@ namespace ConeEngine.Model.Entry.Event
         {
             //return Target.Trigger.Validate(
             //    Target.Get()) && (!OnChange || Target.Diff());
-            return false;
+            //return false;
+            var poll = Target.HasPoll(true);
+            
+            var value = Target.Get();
+            var prescaled = Target.Prescaler.ScaleForward(value);
+            var scaled = Target.Scaling.ScaleForward(prescaled);
+
+            var valid = Target.Trigger.Validate(
+                    scaled, poll
+                );
+
+            return valid;
         }
     }
 }

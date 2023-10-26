@@ -9,16 +9,37 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cone", "Cone\Cone.csproj", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ConeJSON", "ConeJSON", "{E2FCB831-10D1-4CBF-BD0E-48907FA2B96E}"
 	ProjectSection(SolutionItems) = preProject
-		ConeJSON\compile.js = ConeJSON\compile.js
-		ConeJSON\main.js = ConeJSON\main.js
 		ConeJSON\package-lock.json = ConeJSON\package-lock.json
 		ConeJSON\package.json = ConeJSON\package.json
-		ConeJSON\util.js = ConeJSON\util.js
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Elementy rozwiązania", "Elementy rozwiązania", "{9157DDDF-3194-4D06-BAD9-709CDA059744}"
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConeUnitTests", "ConeUnitTests\ConeUnitTests.csproj", "{4BB7F0BF-FB5B-43FB-9034-8E20B9B210D5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A5F9880B-3DE8-4EDE-AFCF-FE537E321178}"
+	ProjectSection(SolutionItems) = preProject
+		ConeJSON\src\Bind.js = ConeJSON\src\Bind.js
+		ConeJSON\src\compile.js = ConeJSON\src\compile.js
+		ConeJSON\src\Device.js = ConeJSON\src\Device.js
+		ConeJSON\src\Entry.js = ConeJSON\src\Entry.js
+		ConeJSON\src\Event.js = ConeJSON\src\Event.js
+		ConeJSON\src\generateConfig.js = ConeJSON\src\generateConfig.js
+		ConeJSON\src\Scale.js = ConeJSON\src\Scale.js
+		ConeJSON\src\Trigger.js = ConeJSON\src\Trigger.js
+		ConeJSON\src\util.js = ConeJSON\src\util.js
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{F3A00AAD-FC6D-4CF6-BF55-E812E10535BB}"
+	ProjectSection(SolutionItems) = preProject
+		ConeJSON\test\Bind.test.js = ConeJSON\test\Bind.test.js
+		ConeJSON\test\Entry.test.js = ConeJSON\test\Entry.test.js
+		ConeJSON\test\Event.test.js = ConeJSON\test\Event.test.js
+		ConeJSON\test\Scale.test.js = ConeJSON\test\Scale.test.js
+		ConeJSON\test\Trigger.test.js = ConeJSON\test\Trigger.test.js
 	EndProjectSection
 EndProject
 Global
@@ -55,9 +76,25 @@ Global
 		{DCD0CF7B-FEA1-464C-A8CF-A08F40193108}.Release|x64.Build.0 = Release|x64
 		{DCD0CF7B-FEA1-464C-A8CF-A08F40193108}.Release|x86.ActiveCfg = Release|x86
 		{DCD0CF7B-FEA1-464C-A8CF-A08F40193108}.Release|x86.Build.0 = Release|x86
+		{4BB7F0BF-FB5B-43FB-9034-8E20B9B210D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BB7F0BF-FB5B-43FB-9034-8E20B9B210D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BB7F0BF-FB5B-43FB-9034-8E20B9B210D5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4BB7F0BF-FB5B-43FB-9034-8E20B9B210D5}.Debug|x64.Build.0 = Debug|Any CPU
+		{4BB7F0BF-FB5B-43FB-9034-8E20B9B210D5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4BB7F0BF-FB5B-43FB-9034-8E20B9B210D5}.Debug|x86.Build.0 = Debug|Any CPU
+		{4BB7F0BF-FB5B-43FB-9034-8E20B9B210D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BB7F0BF-FB5B-43FB-9034-8E20B9B210D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4BB7F0BF-FB5B-43FB-9034-8E20B9B210D5}.Release|x64.ActiveCfg = Release|Any CPU
+		{4BB7F0BF-FB5B-43FB-9034-8E20B9B210D5}.Release|x64.Build.0 = Release|Any CPU
+		{4BB7F0BF-FB5B-43FB-9034-8E20B9B210D5}.Release|x86.ActiveCfg = Release|Any CPU
+		{4BB7F0BF-FB5B-43FB-9034-8E20B9B210D5}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A5F9880B-3DE8-4EDE-AFCF-FE537E321178} = {E2FCB831-10D1-4CBF-BD0E-48907FA2B96E}
+		{F3A00AAD-FC6D-4CF6-BF55-E812E10535BB} = {E2FCB831-10D1-4CBF-BD0E-48907FA2B96E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {586327C1-FE87-4BF3-963A-857B01750499}

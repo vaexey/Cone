@@ -46,7 +46,8 @@ namespace ConeEngine.Model.Entry.Bind
             if (config["trigger"] is JObject triggerj)
             {
                 Trigger.Deserialize(triggerj, ctx);
-                TriggerScaling.Deserialize(triggerj, ctx);
+                // TODO
+                TriggerScaling.Deserialize(triggerj["scale"] as JObject, ctx);
             }
         }
     }

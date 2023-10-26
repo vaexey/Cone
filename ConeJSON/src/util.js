@@ -135,8 +135,15 @@ exports.applyMacros = (macros, source) => {
     return source
 }
 
+let cCounter = 0; // common counter
+
 exports.insertMacro = (macros, id, args) => {
     var macro = macros.filter(m => m.id == id)[0]
+
+    if(!macro.counter)
+        macro.counter = 0;
+
+    let mid = ++macro.counter;
 
     if(Array.isArray(args))
     {
@@ -154,6 +161,15 @@ exports.insertMacro = (macros, id, args) => {
     macro.args.forEach(a => {
         json = json.replaceAll("${" + a + "}", args[a])
     })
+
+    json = json.replaceAll("${m}", mid)
+
+    while(json.indexOf("${c}") != -1)
+        json = json.replace("${c}", ++cCounter)
+    
+    let pCounter = 0;
+    while(json.indexOf("${p}") != -1)
+        json = json.replace("${p}", ++pCounter)
 
     return exports.applyMacros(macros, JSON.parse(json));
 }

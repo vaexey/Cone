@@ -1,4 +1,5 @@
 ﻿using ConeEngine.Model.Flow;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,6 +38,11 @@ namespace ConeEngine.Model.Entry.Action
             {
                 enableTime = DateTime.Now.AddMilliseconds(Timeout);
             }
+        }
+
+        public virtual void Deserialize(JObject config, Context ctx)
+        {
+            Timeout = config.Value<int>("timeout");
         }
     }
 }

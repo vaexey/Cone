@@ -11,7 +11,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\generateConfig.js"
+            "program": "${workspaceFolder}\\src\\generateConfig.js"
         }
     ]
 }

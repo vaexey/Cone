@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace ConeEngine.Model.Entry
@@ -12,6 +13,8 @@ namespace ConeEngine.Model.Entry
     {
         public string? Name { get; set; }
         public string? ID { get; set; }
+
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public abstract EntryType? Type { get; }
 
         public virtual Result Enable(Context ctx)

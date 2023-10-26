@@ -1,10 +1,12 @@
-﻿using ConeEngine.Model.Flow;
+﻿using ConeEngine.Model.Entry.Snapshot;
+using ConeEngine.Model.Flow;
 using Newtonsoft.Json.Linq;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace ConeEngine.Model.Entry.Bind
@@ -26,30 +28,57 @@ namespace ConeEngine.Model.Entry.Bind
 
         public virtual BindMethod Method { get; set; } = new BindMethod();
 
+        public virtual BindEntrySnapshot LastSnapshot { get; set; } = new();
+
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public virtual BindDirection Direction { get; set; } = BindDirection.FORWARD;
 
         public override Result Update(Context ctx)
         {
-            var inputUpdates = GetUpdatesOf(Inputs);
+            lock(LastSnapshot)
+            {
+                LastSnapshot.Reset();
 
-            var doInputUpdate = inputUpdates.Any();
+                var inputUpdates = GetUpdatesOf(Inputs);
 
-            if (doInputUpdate)
-                DoInputUpdate(inputUpdates);
+                var doInputUpdate = inputUpdates.Any();
+
+                if (doInputUpdate)
+                {
+                    DoInputUpdate(inputUpdates);
+
+                    return Result.OK;
+                }
+
+                // TODO
+                if(Direction == BindDirection.BOTH)
+                {
+                    var outputUpdates = GetUpdatesOfBackward(Outputs);
+
+                    var doOutputUpdate = outputUpdates.Any();
+
+                    if (doOutputUpdate)
+                        DoOutputUpdate(outputUpdates);
+                }
+
+
+            }
 
             return Result.OK;
         }
 
         protected virtual void DoInputUpdate(BindNode[] nodes)
         {
-            var combinedValue = Method.Combine(
-                nodes.Select(node =>
+            var values = nodes.Select(node =>
                     node.Scaling.ScaleForward(
                         node.Prescaler.ScaleForward(
                             node.Get()
                         )
                     )
-               ),
+               ).ToArray();
+
+            var combinedValue = Method.Combine(
+                values,
                 nodes.Length
             );
 
@@ -59,9 +88,25 @@ namespace ConeEngine.Model.Entry.Bind
 
             var outputScaled = OutputScaling.ScaleForward(inputScaled);
 
-            var distributed = Method.Distribute(outputScaled, Outputs.Count);
+            var distributed = Method.Distribute(outputScaled, Outputs.Count).ToArray();
 
-            foreach(var zip in Outputs.Zip(distributed, (a,b) => new { Output = a, Value = b }))
+            if(triggerStatus)
+            {
+                DistributeOutputValues(distributed);
+            }
+
+            LastSnapshot.ActivatedInputs = nodes.Select(n => Inputs.IndexOf(n)).ToArray();
+            LastSnapshot.ValueCombined = combinedValue;
+            LastSnapshot.ValueInputScaled = inputScaled;
+            LastSnapshot.ValueOutputScaled = outputScaled;
+            LastSnapshot.Triggered = triggerStatus;
+            LastSnapshot.Combined = values;
+            LastSnapshot.Distribution = distributed;
+        }
+        
+        protected virtual void DistributeOutputValues(IEnumerable<double> distributed)
+        {
+            foreach (var zip in Outputs.Zip(distributed, (a, b) => new { Output = a, Value = b }))
             {
                 var output = zip.Output;
                 var value = zip.Value;
@@ -75,6 +120,53 @@ namespace ConeEngine.Model.Entry.Bind
             }
         }
 
+        // TODO
+        protected virtual void DoOutputUpdate(BindNode[] nodes)
+        {
+            var values = nodes.Select(node =>
+                    node.Scaling.ScaleBackward(
+                        node.Prescaler.ScaleBackward(
+                            node.Get()
+                        )
+                    )
+               ).ToArray();
+
+            var combinedValue = Method.Combine(
+                values,
+                nodes.Length
+            );
+
+
+            var outputScaled = OutputScaling.ScaleForward(combinedValue);
+
+            var triggerStatus = Trigger.Validate(outputScaled, true);
+
+            var inputScaled = InputScaling.ScaleForward(outputScaled);
+
+            var distributed = Method.Distribute(inputScaled, Outputs.Count).ToArray();
+
+            foreach (var zip in Inputs.Zip(distributed, (a, b) => new { Input = a, Value = b }))
+            {
+                var input = zip.Input;
+                var value = zip.Value;
+
+                var mainScaled = input.Scaling.ScaleBackward(value);
+                var triggerScaled = input.TriggerScaling.ScaleBackward(mainScaled);
+                var prescaled = input.Prescaler.ScaleBackward(mainScaled);
+
+                if (input.Trigger.Validate(triggerScaled, true))
+                    input.Set(prescaled);
+            }
+
+            LastSnapshot.ActivatedInputs = nodes.Select(n => Inputs.IndexOf(n)).ToArray();
+            LastSnapshot.ValueCombined = combinedValue;
+            LastSnapshot.ValueInputScaled = inputScaled;
+            LastSnapshot.ValueOutputScaled = outputScaled;
+            LastSnapshot.Triggered = triggerStatus;
+            LastSnapshot.Combined = values;
+            LastSnapshot.Distribution = distributed;
+        }
+
         protected static BindNode[] GetUpdatesOf(List<BindNode> nodes)
         {
             return nodes.Where(node =>
@@ -83,9 +175,24 @@ namespace ConeEngine.Model.Entry.Bind
 
                 var value = node.Get();
                 var prescaled = node.Prescaler.ScaleForward(value);
+                var tscaled = node.TriggerScaling.ScaleForward(prescaled);
+
+                return node.Trigger.Validate(tscaled, poll);
+            }).ToArray();
+        }
+        
+        // TODO
+        protected static BindNode[] GetUpdatesOfBackward(List<BindNode> nodes)
+        {
+            return nodes.Where(node =>
+            {
+                var poll = node.HasPoll(true);
+
+                var value = node.Get();
+                var prescaled = node.Prescaler.ScaleBackward(value);
                 var tscaled = node.TriggerScaling.ScaleBackward(prescaled);
 
-                return node.Trigger.Validate(value, poll);
+                return node.Trigger.Validate(tscaled, poll);
             }).ToArray();
         }
 
@@ -97,12 +204,18 @@ namespace ConeEngine.Model.Entry.Bind
             var outj = config["output"] as JArray;
 
             if (inj == null || outj == null)
-                throw new Exception($"Entry ${ID} does not have bind nodes.");
+                throw new Exception($"Entry {ID} does not have bind nodes.");
 
             Inputs = inj.Select(bnj => ctx.InstantiateBindNode(bnj as JObject)).ToList();
             Outputs = outj.Select(bnj => ctx.InstantiateBindNode(bnj as JObject)).ToList();
 
-            if(config.Value<string>("direction") is string direction)
+            if (config["iscale"] is JObject iscalej)
+                InputScaling.Deserialize(iscalej, ctx);
+
+            if (config["oscale"] is JObject oscalej)
+                OutputScaling.Deserialize(oscalej, ctx);
+
+            if (config.Value<string>("direction") is string direction)
             {
                 if (direction == "both")
                     Direction = BindDirection.BOTH;

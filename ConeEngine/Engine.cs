@@ -2,6 +2,7 @@
 using ConeEngine.Model.Device;
 using ConeEngine.Model.Entry;
 using ConeEngine.Model.Flow;
+using ConeEngine.Panel;
 using ConeEngine.Plugin;
 using Serilog;
 
@@ -19,8 +20,6 @@ namespace ConeEngine
         /// </summary>
         public List<Entry> Entries { get; set; } = new();
 
-        public EngineConfig Config { get; set; } = new();
-
         public Scheduler Scheduler { get; set; } = new();
 
         /// <summary>
@@ -28,9 +27,12 @@ namespace ConeEngine
         /// </summary>
         public Context Context { get; set; }
 
+        public PanelServer Panel { get; set; }
+
         public Engine()
         {
             Context = new(this);
+            Panel = new(Context);
         }
 
         public Result Initialize()
@@ -47,12 +49,17 @@ namespace ConeEngine
                 Log.Information("Available plugins: {0}", PluginLoader.Plugins.Count);
 
                 Log.Information("Loading config...");
-                Config.Load(this);
+                EngineConfig.GenerateFromJSON5();
+                EngineConfig.LoadConfig(this);
 
                 Log.Information("Enabling plugins...");
                 PluginLoader.Enable(Context);
 
                 Scheduler.AddScheduledTask(TryEnableTask, 1000);
+
+                Log.Information("Starting panel server...");
+
+                _ = Panel.Run();
             }
             catch(Exception ex)
             {

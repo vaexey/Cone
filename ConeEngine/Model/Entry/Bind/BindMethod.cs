@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace ConeEngine.Model.Entry.Bind
@@ -21,8 +22,11 @@ namespace ConeEngine.Model.Entry.Bind
             SPLIT
         }
 
-        public SimpleModeIn In = SimpleModeIn.SUM;
-        public SimpleModeOut Out = SimpleModeOut.REPEAT;
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public SimpleModeIn In { get; set; } = SimpleModeIn.SUM;
+
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public SimpleModeOut Out { get; set;  } = SimpleModeOut.REPEAT;
 
         public virtual double Combine(IEnumerable<double> sources, int count)
         {

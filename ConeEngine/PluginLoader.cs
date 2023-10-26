@@ -61,7 +61,7 @@ namespace ConeEngine
         public static IPlugin Get(string id)
         {
             if (!PluginMap.ContainsKey(id))
-                throw new Exception($"Plugin with id ${id} does not exist.");
+                throw new Exception($"Plugin with id {id} does not exist.");
 
             return PluginMap[id];
         }

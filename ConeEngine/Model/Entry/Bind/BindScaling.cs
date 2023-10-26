@@ -10,14 +10,14 @@ namespace ConeEngine.Model.Entry.Bind
 {
     public class BindScaling
     {
-        public double FromMin { get; set; }
-        public double FromMax { get; set; }
+        public double FromMin { get; set; } = 0;
+        public double FromMax { get; set; } = 1;
 
-        public double ToMin { get; set; }
-        public double ToMax { get; set; }
+        public double ToMin { get; set; } = 0;
+        public double ToMax { get; set; } = 1;
 
         public double Modulo { get; set; } = 0;
-        public int Round { get; set; } = 0;
+        public int Round { get; set; } = -1;
 
         public virtual double ScaleForward(double source)
         {
