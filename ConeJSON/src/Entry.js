@@ -2,6 +2,7 @@ const util = require('./util');
 const Bind = require('./Bind');
 const Scale = require('./Scale');
 const Event = require('./Event');
+const Trigger = require('./Trigger');
 
 let entCounter = 0;
 exports.expandEntry = (src) => {
@@ -42,6 +43,11 @@ exports.expandEntry = (src) => {
     
         ent.input = ent.input.map(Bind.expandBindNode)
         ent.output = ent.output.map(Bind.expandBindNode)
+        
+        ent.trigger = Trigger.expandTrigger(ent.trigger);
+
+        Scale.expandScaleProperty(ent, "iscale")
+        Scale.expandScaleProperty(ent, "oscale")
     }
 
     if(ent.type.toLowerCase() == "event")
@@ -54,9 +60,6 @@ exports.expandEntry = (src) => {
         ent.trigger = ent.trigger.map(Event.expandEventNode)
         ent.actions = ent.actions.map(Event.expandEventNode)
     }
-
-    Scale.expandScaleProperty(ent, "iscale")
-    Scale.expandScaleProperty(ent, "oscale")
 
     return ent;
 }

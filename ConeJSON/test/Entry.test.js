@@ -29,6 +29,7 @@ test('bind entry has required properties', () => {
 
     expect(ent).toHaveProperty("iscale")
     expect(ent).toHaveProperty("oscale")
+    expect(ent).toHaveProperty("trigger")
 })
 
 test('event entry has required properties', () => {

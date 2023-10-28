@@ -18,6 +18,9 @@ exports.expandTrigger = (src) => {
     if(src.poll === undefined)
         src.poll = true;
 
+    if(src.change === undefined)
+        src.change = false;
+
     src.scale = Scale.expandScale(src.scale)
 
     return src

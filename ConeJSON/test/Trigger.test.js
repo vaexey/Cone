@@ -6,6 +6,7 @@ test('trigger default value', () => {
         max: 1,
         value: false,
         poll: true,
+        change: false,
         scale: {
             from: [0,1],
             to: [0, 1]

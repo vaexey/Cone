@@ -14,16 +14,37 @@ namespace ConeEngine.Model.Entry.Bind
         public virtual double Maximum { get; set; } = 1;
         public bool ValueMatch { get; set; } = false;
         public bool PollMatch { get; set; } = true;
+        public bool ChangeMatch { get; set; } = false;
+
+        public double LastChangeValue { get; set; } = double.MaxValue;
 
         public virtual bool Validate(double value, bool poll = false)
         {
+            var change = ValidateChange(value);
+
             return (!PollMatch || poll) &&
-                (!ValueMatch || (CmpDbl(Minimum, value) && CmpDbl(value, Maximum)));
+                   (!ChangeMatch || change) &&
+                   (!ValueMatch || (CmpDbl(Minimum, value) && CmpDbl(value, Maximum)));
+        }
+
+        protected bool EqDbl(double v1, double v2)
+        {
+            return Math.Abs(v1 - v2) < 0.01;
         }
 
         protected bool CmpDbl(double smaller, double bigger)
         {
-            return bigger >= smaller || Math.Abs(bigger - smaller) < 0.01;
+            return bigger >= smaller || EqDbl(bigger, smaller);
+        }
+
+        protected bool ValidateChange(double newValue)
+        {
+            var change = !EqDbl(newValue, LastChangeValue);
+
+            if(change)
+                LastChangeValue = newValue;
+
+            return change;
         }
 
         public virtual void Deserialize(JObject config, Context ctx)
@@ -33,6 +54,7 @@ namespace ConeEngine.Model.Entry.Bind
 
             ValueMatch = config.Value<bool>("value");
             PollMatch = config.Value<bool>("poll");
+            ChangeMatch = config.Value<bool>("change");
         }
     }
 }

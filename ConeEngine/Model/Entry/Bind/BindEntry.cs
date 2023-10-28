@@ -215,6 +215,9 @@ namespace ConeEngine.Model.Entry.Bind
             if (config["oscale"] is JObject oscalej)
                 OutputScaling.Deserialize(oscalej, ctx);
 
+            if (config["trigger"] is JObject trigj)
+                Trigger.Deserialize(trigj, ctx);
+
             if (config.Value<string>("direction") is string direction)
             {
                 if (direction == "both")

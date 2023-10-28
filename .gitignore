@@ -6,6 +6,8 @@
 # Cone-specific
 
 ConeJSON/config.*
+ConeJSON/dist
+/dist
 
 # User-specific files
 *.rsuser

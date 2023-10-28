@@ -26,7 +26,8 @@ exports.compile = async (srcPath, destPath) => {
     const src = JSON5.parse(json);
 
     const dest = exports.compileRaw(src);
-    const write = JSON.stringify(dest, null, 4);
+    const write = JSON.stringify(dest);
+    // const write = JSON.stringify(dest, null, 4);
 
     await fs.writeFile(destPath, write);
 }

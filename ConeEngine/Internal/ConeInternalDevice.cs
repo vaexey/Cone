@@ -44,6 +44,20 @@ namespace ConeEngine.Internal
                 return Result.VAL<CAction>(act);
             }
 
+            if(target == "key")
+            {
+                var act = new KeyConeInternalAction();
+
+                return Result.VAL<CAction>(act);
+            }
+
+            if(target == "set")
+            {
+                var act = new SetInternalAction();
+
+                return Result.VAL<CAction>(act);
+            }
+
             return Result.Error<CAction>("Could not find matching internal action.");
         }
         public override Result<BindNode> CreateBindNode(Context ctx, JObject config)
@@ -74,7 +88,7 @@ namespace ConeEngine.Internal
             {
                 var bn = new OnceInternalBindNode();
 
-                if (config.Value<double?>("") is double start)
+                if (config.Value<double?>("start") is double start)
                     bn.Value = start;
 
                 return Result.VAL<BindNode>(bn);
