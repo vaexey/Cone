@@ -1,4 +1,6 @@
 ﻿using ConeEngine.Model.Entry.Bind;
+using ConeEngine.Model.Flow;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,6 +29,14 @@ namespace ConeEngine.Internal.BindNodes
         public override bool HasPoll(bool reset = false)
         {
             return true;
+        }
+
+        public override void Deserialize(JObject config, Context ctx)
+        {
+            base.Deserialize(config, ctx);
+
+            Minimum = config.Value<double>("min");
+            Maximum = config.Value<double>("max");
         }
     }
 }

@@ -16,12 +16,15 @@ using System.Threading.Tasks;
 
 namespace ConeEngine.Model.Config
 {
-    public static class EngineConfig
+    public static class EngineConfigurator
     {
-        public static void GenerateFromJSON5()
+        public static void GenerateFromJSON5(Engine e)
         {
             //var p = Process.Start("node ", @".\..\..\..\..\..\ConeJSON\generateConfig.js");
-            var p = Process.Start("node ", @"./compiler/index.js");
+            var p = Process.Start(
+                e.Properties.CompilerExecutable, 
+                e.Properties.CompilerArgs
+            );
 
             p.WaitForExit();
 
@@ -33,7 +36,7 @@ namespace ConeEngine.Model.Config
 
         public static void LoadConfig(Engine e)
         {
-            var path = "./config/config.json";
+            var path = e.Properties.ConfigPath;
 
             var str = File.ReadAllText(path);
             var json = JObject.Parse(str);
@@ -44,6 +47,7 @@ namespace ConeEngine.Model.Config
             if (devArray is null || entArray is null)
                 throw new Exception("Could not load config. Nonexistent main arrays.");
 
+            // TODO: code quality
             Log.Debug("Registering devices...");
 
             foreach(var devj in devArray)

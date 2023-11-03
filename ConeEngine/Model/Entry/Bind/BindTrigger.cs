@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace ConeEngine.Model.Entry.Bind
@@ -16,6 +17,8 @@ namespace ConeEngine.Model.Entry.Bind
         public bool PollMatch { get; set; } = true;
         public bool ChangeMatch { get; set; } = false;
 
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
         public double LastChangeValue { get; set; } = double.MaxValue;
 
         public virtual bool Validate(double value, bool poll = false)

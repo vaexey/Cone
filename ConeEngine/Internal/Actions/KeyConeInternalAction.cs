@@ -15,9 +15,9 @@ namespace ConeEngine.Internal.Actions
         [DllImport("user32.dll", SetLastError = true)]
         static extern void keybd_event(byte bVk, byte bScan, int dwFlags, int dwExtraInfo);
 
-        protected const int KEYEVENTF_KEYDOWN = 0x0000; // New definition
-        protected const int KEYEVENTF_EXTENDEDKEY = 0x0001; //Key down flag
-        protected const int KEYEVENTF_KEYUP = 0x0002; //Key up flag
+        protected const int KEYEVENTF_KEYDOWN = 0x0000;
+        protected const int KEYEVENTF_EXTENDEDKEY = 0x0001;
+        protected const int KEYEVENTF_KEYUP = 0x0002;
 
         public byte KeyCode { get; set; } = 0;
         public bool Down { get; set; } = true;

@@ -14,6 +14,7 @@ using Serilog.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,6 +26,8 @@ namespace ConeEngine.Panel
 
         protected Thread? serverThread;
 
+        protected WebApplication? app;
+
         public PanelServer(Context context)
         {
             this.context = context;
@@ -32,8 +35,11 @@ namespace ConeEngine.Panel
 
         public async Task Run()
         {
+            if (app is not null)
+                throw new Exception("Cannot run another instance of PanelServer");
+
             var builder = GetBuilder();
-            var app = builder.Build();
+            app = builder.Build();
 
             //app.MapControllers();
 
@@ -46,20 +52,32 @@ namespace ConeEngine.Panel
             //        ),
             //    RequestPath = "/static"
             //});
+            app.MapGet("/cone/version", () =>
+                Assembly.GetAssembly(typeof(PanelServer)).GetName().Version.ToString());
 
-            app.MapGet("/devices", () => 
+            app.MapGet("/cone/devices", () => 
                 context.GetAllDevices());
 
-            app.MapGet("/entries", () =>
+            app.MapGet("/cone/entries", () =>
                 context.GetAllEntries());
 
-            app.MapGet("/entries/bind/{id}", (string id) =>
+            app.MapGet("/cone/entries/bind/{id}", (string id) =>
                 context.GetBindEntry(id)
                     is BindEntry b
                     ? Results.Ok(b)
                     : Results.NotFound());
 
             await app.RunAsync();
+        }
+
+        public async Task Stop()
+        {
+            if(app is not null)
+            {
+                await app.StopAsync();
+
+                app = null;
+            }
         }
 
         protected WebApplicationBuilder GetBuilder()

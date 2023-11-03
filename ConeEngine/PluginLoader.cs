@@ -19,7 +19,7 @@ namespace ConeEngine
 
         public static void Enable(Context ctx)
         {
-            foreach(var p in Plugins)
+            foreach (var p in Plugins)
             {
                 var r = ExWrapper.Wrap(() => p.Enable(ctx));
 
@@ -58,6 +58,11 @@ namespace ConeEngine
             }
         }
 
+        public static bool AreAllPluginsEnabled()
+        {
+            return !Plugins.Where(p => !p.Enabled).Any();
+        }
+
         public static IPlugin Get(string id)
         {
             if (!PluginMap.ContainsKey(id))
@@ -66,13 +71,15 @@ namespace ConeEngine
             return PluginMap[id];
         }
 
-        public static void LoadPlugins()
+        public static bool LoadPlugins(string directory)
         {
+            //if (loaded)
+            //    throw new Exception("Plugins have been already loaded.");
             if (loaded)
-                throw new Exception("Plugins have been already loaded.");
+                return false;
 
             foreach (
-                var p in Directory.GetFiles("./plugins")
+                var p in Directory.GetFiles(directory)
                 .Where(p => Path.GetFileNameWithoutExtension(p)
                 .ToLower()
                 .Contains("cone"))
@@ -82,6 +89,8 @@ namespace ConeEngine
             }
 
             loaded = true;
+
+            return true;
         }
 
         public static void LoadPlugin(string path)

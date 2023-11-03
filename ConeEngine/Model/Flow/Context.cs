@@ -1,4 +1,5 @@
-﻿using ConeEngine.Model.Entry.Action;
+﻿using ConeEngine.Model.Config;
+using ConeEngine.Model.Entry.Action;
 using ConeEngine.Model.Entry.Bind;
 using ConeEngine.Model.Entry.Event;
 using ConeEngine.Model.Entry.Snapshot;
@@ -18,6 +19,8 @@ namespace ConeEngine.Model.Flow
         {
             this.engine = engine;
         }
+
+        public EngineProperties GetProperties() => engine.Properties;
 
         public Entry.Entry? GetEntry(string id)
         {
@@ -57,6 +60,20 @@ namespace ConeEngine.Model.Flow
         public T? GetDevice<T>(string id) where T : Device.Device
         {
             return GetDevice(id) as T;
+        }
+
+        private Internal.V8Device? v8device;
+        public Internal.V8Device GetV8Device()
+        {
+            if(v8device == null)
+            {
+                v8device = GetDevice<Internal.V8Device>("v8");
+            }
+
+            if (v8device == null)
+                throw new Exception("V8 device does not exist!");
+
+            return v8device;
         }
 
 

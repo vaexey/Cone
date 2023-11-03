@@ -1,4 +1,6 @@
 ﻿using ConeEngine.Model.Entry.Bind;
+using ConeEngine.Model.Flow;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,6 +39,13 @@ namespace ConeEngine.Internal.BindNodes
             }
 
             return false;
+        }
+
+        public override void Deserialize(JObject config, Context ctx)
+        {
+            base.Deserialize(config, ctx);
+
+            Value = config.Value<double>("start");
         }
     }
 }

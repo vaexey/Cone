@@ -1,5 +1,6 @@
 ﻿using ConeEngine.Model.Entry.Action;
 using ConeEngine.Model.Flow;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,12 +12,7 @@ namespace ConeEngine.Internal.Actions
 {
     public class ShellConeInternalAction : CAction
     {
-        public string Command { get; set; }
-
-        public ShellConeInternalAction(string command)
-        {
-            Command = command;
-        }
+        public string Command { get; set; } = "";
 
         public override Result Execute(Context ctx, object[] args)
         {
@@ -34,6 +30,14 @@ namespace ConeEngine.Internal.Actions
             p.Start();
 
             return Result.OK;
+        }
+
+        public override void Deserialize(JObject config, Context ctx)
+        {
+            base.Deserialize(config, ctx);
+
+            if (config.Value<string>("command") is string jcmd)
+                Command = jcmd;
         }
     }
 }

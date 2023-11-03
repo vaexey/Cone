@@ -11,6 +11,7 @@ namespace ConeEngine.Internal
         public static void LinkInternals(Engine e)
         {
             e.Devices.Add(new ConeInternalDevice());
+            e.Devices.Add(new V8Device());
         }
     }
 }

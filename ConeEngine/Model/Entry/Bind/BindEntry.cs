@@ -18,7 +18,10 @@ namespace ConeEngine.Model.Entry.Bind
         public virtual List<BindNode> Inputs { get; set; } = new();
         public virtual List<BindNode> Outputs { get; set; } = new();
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
         public virtual BindNode MainInput { get => Inputs.First(); }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
         public virtual BindNode MainOutput { get => Outputs.First(); }
 
         public virtual BindScaling InputScaling { get; set; } = new BindScaling();

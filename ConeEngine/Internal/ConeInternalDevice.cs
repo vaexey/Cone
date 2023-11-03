@@ -15,6 +15,23 @@ namespace ConeEngine.Internal
 {
     public class ConeInternalDevice : Device
     {
+        public static Dictionary<string, Type> ActionDictionary = new()
+        {
+            { "toggle", typeof(ToggleConeInternalAction) },
+            { "shell", typeof(ShellConeInternalAction) },
+            { "key", typeof(KeyConeInternalAction) },
+            { "set", typeof(SetInternalAction) },
+            { "stop", typeof(StopConeInternalAction) },
+        };
+
+        public static Dictionary<string, Type> BindNodeDictionary = new()
+        {
+            {"random", typeof(RNGInternalBindNode)},
+            {"time", typeof(TimeInternalBindNode)},
+            {"once", typeof(OnceInternalBindNode)},
+            {"debug", typeof(DebugInternalBindNode)},
+        };
+
         public ConeInternalDevice()
         {
             Name = "Built-in engine device";
@@ -23,39 +40,16 @@ namespace ConeEngine.Internal
 
         public override Result<CAction> CreateAction(Context ctx, string target, JObject config)
         {
-            if (target == "toggle")
+            if(ActionDictionary.ContainsKey(target))
             {
-                var min = config.Value<double>("min");
-                var max = config.Value<double>("max");
+                var type = ActionDictionary[target];
 
-                var nid = config.Value<string>("id");
+                var obj = (CAction?)Activator.CreateInstance(type);
 
-                var act = new ToggleConeInternalAction(nid, min,max);
-
-                return Result.VAL<CAction>(act);
-            }
-
-            if(target == "shell")
-            {
-                var cmd = config.Value<string>("command");
-
-                var act = new ShellConeInternalAction(cmd);
-
-                return Result.VAL<CAction>(act);
-            }
-
-            if(target == "key")
-            {
-                var act = new KeyConeInternalAction();
-
-                return Result.VAL<CAction>(act);
-            }
-
-            if(target == "set")
-            {
-                var act = new SetInternalAction();
-
-                return Result.VAL<CAction>(act);
+                if(obj is not null)
+                {
+                    return Result.VAL(obj);
+                }
             }
 
             return Result.Error<CAction>("Could not find matching internal action.");
@@ -64,41 +58,16 @@ namespace ConeEngine.Internal
         {
             var target = config.Value<string>("target");
 
-            if(target == "random")
+            if (target is not null && BindNodeDictionary.ContainsKey(target))
             {
-                var bn = new RNGInternalBindNode();
+                var type = BindNodeDictionary[target];
 
-                if (config.Value<double?>("min") is double min)
-                    bn.Minimum = min;
+                var obj = (BindNode?)Activator.CreateInstance(type);
 
-                if (config.Value<double?>("max") is double max)
-                    bn.Maximum = max;
-
-                return Result.VAL<BindNode>(bn);
-            }
-
-            if(target == "time")
-            {
-                var bn = new TimeInternalBindNode();
-
-                return Result.VAL<BindNode>(bn);
-            }
-
-            if(target == "once")
-            {
-                var bn = new OnceInternalBindNode();
-
-                if (config.Value<double?>("start") is double start)
-                    bn.Value = start;
-
-                return Result.VAL<BindNode>(bn);
-            }
-
-            if(target == "debug")
-            {
-                var bn = new DebugInternalBindNode();
-
-                return Result.VAL<BindNode>(bn);
+                if (obj is not null)
+                {
+                    return Result.VAL(obj);
+                }
             }
 
             return Result.Error<BindNode>("Could not find matching internal bind node.");

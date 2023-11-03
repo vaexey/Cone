@@ -39,4 +39,5 @@ test('event entry has required properties', () => {
 
     expect(Array.isArray(ent.trigger)).toBe(true)
     expect(Array.isArray(ent.actions)).toBe(true)
+    expect(ent.basic).toBe(true)
 })

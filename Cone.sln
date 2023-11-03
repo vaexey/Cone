@@ -16,9 +16,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Elementy rozwiązania", "Elementy rozwiązania", "{9157DDDF-3194-4D06-BAD9-709CDA059744}"
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
+		release.bat = release.bat
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConeUnitTests", "ConeUnitTests\ConeUnitTests.csproj", "{4BB7F0BF-FB5B-43FB-9034-8E20B9B210D5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConeUnitTests", "ConeUnitTests\ConeUnitTests.csproj", "{4BB7F0BF-FB5B-43FB-9034-8E20B9B210D5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A5F9880B-3DE8-4EDE-AFCF-FE537E321178}"
 	ProjectSection(SolutionItems) = preProject

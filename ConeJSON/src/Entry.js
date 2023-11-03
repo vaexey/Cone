@@ -59,6 +59,9 @@ exports.expandEntry = (src) => {
 
         ent.trigger = ent.trigger.map(Event.expandEventNode)
         ent.actions = ent.actions.map(Event.expandEventNode)
+
+        if(ent.basic === undefined)
+            ent.basic = true
     }
 
     return ent;
