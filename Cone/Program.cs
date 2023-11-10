@@ -8,23 +8,25 @@ e.LoadProperties();
 
 while (true)
 {
-
+#if !DEBUG
     try
     {
-        e.LoadPlugins();
+#endif
+    e.LoadPlugins();
 
-        var init = e.Initialize();
+    var init = e.Initialize();
 
-        if (!init.IsOK)
-        {
-            throw new Exception(init.Message);
-        }
+    if (!init.IsOK)
+    {
+        throw new Exception(init.Message);
+    }
 
-        while (e.IsRunning)
-        {
-            e.Update();
-            Thread.Sleep(1);
-        }
+    while (e.IsRunning)
+    {
+        e.Update();
+        Thread.Sleep(1);
+    }
+#if !DEBUG
     }
     catch(Exception ex)
     {
@@ -32,6 +34,7 @@ while (true)
 
         e.Unload();
     }
+#endif
 
     if (!e.Properties.AutoRestart)
         break;

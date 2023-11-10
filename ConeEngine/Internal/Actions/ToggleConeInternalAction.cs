@@ -21,6 +21,9 @@ namespace ConeEngine.Internal.Actions
         {
             var node = ctx.GetEntry<BindEntry>(NodeID);
 
+            if (node is null)
+                throw new Exception("Could not find a bind entry with id " + NodeID);
+
             var current = node.MainOutput.Get();
 
             if(current < Minimum || current > Maximum)

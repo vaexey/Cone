@@ -62,19 +62,18 @@ namespace ConeEngine.Model.Entry.Event
         {
             LastSnapshot.Reset();
 
-            //var v8 = ctx.GetV8Device();
+            var v8 = ctx.GetV8Device();
 
-            //var triggers = Triggers.Select(t => t.Poll(ctx)).ToArray();
+            var triggers = Triggers.Select(t => t.Poll(ctx)).ToArray();
+            var validator = v8.ValidateEvent(this, triggers);
 
-            //var valid = v8.ValidateEvent(this, triggers, out string[] args);
+            foreach(var o in Actions.Zip(validator))
+            {
+                if (o.Second.Valid)
+                    o.First.Execute(ctx, o.Second.Args);
+            }
 
-            //LastSnapshot.Triggered = valid;
-            //LastSnapshot.Triggers = triggers;
-            
-            //if(valid)
-            //{
-            //    Execute(ctx, args);
-            //}
+            LastSnapshot.Triggers = triggers;
         }
 
         protected virtual void Execute(Context ctx, object[] args)
